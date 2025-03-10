@@ -3,9 +3,8 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// const keysecret = process.env.SECRET_KEY
 
-
+const keysecret = process.env.SECRET_KEY
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -32,17 +31,19 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 8
     },
-    // tokens: [
-    //     {
-    //         token: {
-    //             type: String,
-    //             required: true,
-    //         }
-    //     }
-    // ],
-    // verifytoken:{
-    //     type:String,
-    // }
+
+    tokens: [
+        {
+            token: {
+                type: String,
+                required: true,
+            }
+        }
+    ],
+    verifytoken:{
+        type:String,
+    }
+
 });
 userSchema.pre("save", async function (next) {
 
@@ -52,4 +53,19 @@ userSchema.pre("save", async function (next) {
     }
     next()
 });
+
+userSchema.methods.generateAuthToken = async function () {
+    try {
+        let token23 = jwt.sign({ _id: this._id }, keysecret, {
+            expiresIn: "1d"
+        });
+
+        this.tokens = this.tokens.concat({ token: token23 });
+        await this.save();
+        return token23;
+    } catch (error) {
+        res.status(422).json(error)
+    }
+}
+
 module.exports=mongoose.model('users',userSchema)
