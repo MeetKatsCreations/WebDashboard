@@ -1,12 +1,13 @@
 import { useState } from 'react'
-
-
+import {Route,Routes} from 'react-router-dom'
+import Register from './Pages/Register'
+import Login from './Pages/Login'
 function App() {
   return (
     <>
-      <h1 class="text-3xl font-bold underline">
-        Hello world!
-      </h1>
+ <Routes>
+  <Route path="/" element={<Login/>}/>
+ </Routes>
     </>
   )
 }
