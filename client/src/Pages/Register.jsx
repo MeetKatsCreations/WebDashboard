@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showCPassword, setShowCPassword] = useState(false);
-   const navigate=useNavigate();
+    const navigate = useNavigate();
     return (
         <>
             <div className='min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col items-center py-12 am:px-6 lg:px-8'>
@@ -49,7 +49,7 @@ const Register = () => {
                                             />
                                             <button
                                                 type="button"
-                                                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                                                className="absolute inset-y-0 right-3 flex cursor-pointer items-center text-gray-500 hover:text-gray-700"
                                                 onClick={() => setShowPassword(!showPassword)}
                                             >
                                                 {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
@@ -68,7 +68,7 @@ const Register = () => {
                                             />
                                             <button
                                                 type="button"
-                                                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                                                className="absolute inset-y-0 right-3 cursor-pointer flex items-center text-gray-500 hover:text-gray-700"
                                                 onClick={() => setShowCPassword(!showCPassword)}
                                             >
                                                 {showCPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
@@ -76,7 +76,7 @@ const Register = () => {
                                         </div>
                                     </div>
                                     <div className='flex items-center justify-between mb-6'>
-                                        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full' type="submit">Sign In</button>
+                                        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full cursor-pointer' type="submit">Sign Up</button>
                                     </div>
                                     <div className="flex items-center my-4">
 
@@ -86,7 +86,7 @@ const Register = () => {
 
                                     </div>
                                     <div className="flex flex-col space-y-3">
-                                        <button type="button" className="flex items-center justify-center bg-white border border-gray-300 rounded-lg shadow-md px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                        <button type="button" className="flex cursor-pointer items-center justify-center bg-white border border-gray-300 rounded-lg shadow-md px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                             <svg className="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width="800px" height="800px" viewBox="-0.5 0 48 48" version="1.1">
                                                 <title>Google-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd"> <g id="Color-" transform="translate(-401.000000, -860.000000)"> <g id="Google" transform="translate(401.000000, 860.000000)">
                                                     <path d="M9.82727273,24 C9.82727273,22.4757333 10.0804318,21.0144 10.5322727,19.6437333 L2.62345455,13.6042667 C1.08206818,16.7338667 0.213636364,20.2602667 0.213636364,24 C0.213636364,27.7365333 1.081,31.2608 2.62025,34.3882667 L10.5247955,28.3370667 C10.0772273,26.9728 9.82727273,25.5168 9.82727273,24" id="Fill-1" fill="#FBBC05"> </path>
@@ -106,7 +106,7 @@ const Register = () => {
                                             Don't have an account?{" "}
                                             <button
                                                 onClick={() => navigate("/")}
-                                                className="text-blue-500 hover:text-blue-700 font-medium"
+                                                className="text-blue-500 hover:text-blue-700 font-medium cursor-pointer"
                                             >
                                                 Sign in
                                             </button>
