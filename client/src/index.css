@@ -1,2 +1,7 @@
 @import "tailwindcss";
-
+@layer utilities {
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+      display: none;
+    }
+  }

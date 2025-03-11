@@ -1,6 +1,10 @@
 import React from 'react'
+import { useState } from 'react';
 import logo from "../assets/logo.jpg"
+import { FaEyeSlash } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 const Login = () => {
+    const [showPassword, setShowPassword] = useState(false);
     return (
         <>
             <div className='min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col items-center py-12 am:px-6 lg:px-8'>
@@ -26,9 +30,23 @@ const Login = () => {
                                         <input required type="text" placeholder=' Enter your email address' id="email" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
                                     </div>
                                     <div className='mb-4'>
-
                                         <label htmlFor="password" className='block text-gray-700 text-sm font-bold mb-2'>Password</label>
-                                        <input required type="text" placeholder="*********" id="password" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
+                                        <div className="relative">
+                                            <input
+                                                required
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="*********"
+                                                id="password"
+                                                className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline pr-10'
+                                            />
+                                            <button
+                                                type="button"
+                                                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                            >
+                                                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className='flex items-center justify-between mb-6'>
                                         <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full' type="submit">Sign In</button>
