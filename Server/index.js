@@ -5,6 +5,7 @@ const app=express();
 require("./Config/Config")
 app.use(express.json())
 app.use(cookieParser())
+app.use(cors());
 const port=process.env.PORT||3000
 app.use("/",require("./Routes/AuthenticationRoutes"))
 app.listen(port,()=>{

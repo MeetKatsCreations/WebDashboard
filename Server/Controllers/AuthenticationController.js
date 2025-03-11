@@ -1,8 +1,8 @@
 const users = require("../Model/UserModel");
 const axios=require("axios")
 const registerUser = async (req, res) => {
-    const { name, email, password, cpassword} = req.body;
-    if (!name || !email || !password || !cpassword ) {
+    const { name, email, password, cpassword, recaptchaToken } = req.body;
+    if (!name || !email || !password || !cpassword|| !recaptchaToken ) {
         return res.status(400).json({ message: "Fill all the fields!" });
     }
     try {

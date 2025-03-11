@@ -1,16 +1,69 @@
 import React from 'react'
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import logo from "../assets/logo.jpg"
 import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from "react-google-recaptcha";
+import axios from "axios"
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 const Register = () => {
+    const [formData, setFormData] = useState({ name: "", email: "", password: "", cpassword: "" });
     const [showPassword, setShowPassword] = useState(false);
     const [showCPassword, setShowCPassword] = useState(false);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const recaptchaRef = useRef(null);
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+    const handleRecaptchaVerify = async (token) => {
+        if (!token) {
+            toast.error("reCAPTCHA verification failed. Please try again.");
+            return;
+        }
+    
+        try {
+            const response = await axios.post("http://localhost:5000/register", { 
+                ...formData, 
+                recaptchaToken: token 
+            });
+    
+            toast.success("User successfully registered");
+            setTimeout(() => {
+                setLoading(false);
+                navigate("/");
+            }, 2000);
+        } catch (error) {
+            
+            const errorMessage = error.response?.data?.message || "An error occurred. Please try again.";
+            setLoading(false);
+            toast.error(errorMessage);
+        }
+    };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        setLoading(true);
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
+    
+        if (!recaptchaRef.current) {
+            toast.error("reCAPTCHA not loaded.");
+            setLoading(false);
+            return;
+        }
+    
+        recaptchaRef.current.execute();
+    };
     return (
         <>
             <div className='min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col items-center py-12 am:px-6 lg:px-8'>
+            <ToastContainer position="top-right" autoClose={3000} />
                 <div className='flex flex-col  items-center w-full h-50'>
                     <div className='h-24 w-24 rounded-full bg-white p-2 shadow-md  '>
                         <img src={logo} alt="logo" className='h-full w-full object-contain rounded-full' />
@@ -26,25 +79,28 @@ const Register = () => {
                         <div className='w-full max-w-md'>
                             <div className='bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4'>
                                 <h2 className='text-2xl font-bold mb-6 text-center text-gray-800'>Sign Up</h2>
-                                <form >
+                                
+                                <form onSubmit={handleSubmit}>
                                     <div className='mb-4'>
 
                                         <label htmlFor="name" className='block text-gray-700 text-sm font-bold mb-2'>Name</label>
-                                        <input required type="text" placeholder=' Enter your Name' id="name" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
+                                        <input required type="text" placeholder=' Enter your Name' name='name' onChange={handleChange} id="name" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
                                     </div>
                                     <div className='mb-4'>
 
-                                        <label htmlFor="email" className='block text-gray-700 text-sm font-bold mb-2'>Email</label>
-                                        <input required type="text" placeholder=' Enter your email address' id="email" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
+                                        <label htmlFor="email"  className='block text-gray-700 text-sm font-bold mb-2'>Email</label>
+                                        <input required type="text" name="email" onChange={handleChange} placeholder=' Enter your email address' id="email" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
                                     </div>
                                     <div className='mb-4'>
-                                        <label htmlFor="password" className='block text-gray-700 text-sm font-bold mb-2'>Password</label>
+                                        <label htmlFor="password" className='block text-gray-700 text-sm font-bold mb-2'  >Password</label>
                                         <div className="relative">
                                             <input
                                                 required
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="*********"
                                                 id="password"
+                                                onChange={handleChange}
+                                                name="password"
                                                 className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline pr-10'
                                             />
                                             <button
@@ -64,6 +120,8 @@ const Register = () => {
                                                 type={showCPassword ? "text" : "password"}
                                                 placeholder="*********"
                                                 id="cpassword"
+                                                name='cpassword'
+                                                onChange={handleChange}
                                                 className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline pr-10'
                                             />
                                             <button
@@ -76,7 +134,7 @@ const Register = () => {
                                         </div>
                                     </div>
                                     <div className='flex items-center justify-between mb-6'>
-                                        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full cursor-pointer' type="submit">Sign Up</button>
+                                        <button disabled={loading} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full cursor-pointer' type="submit">Sign Up</button>
                                     </div>
                                     <div className="flex items-center my-4">
 
@@ -112,6 +170,12 @@ const Register = () => {
                                             </button>
                                         </p>
                                     </div>
+                                    <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey={RECAPTCHA_SITE_KEY}
+                                        size="invisible"
+                                        onChange={handleRecaptchaVerify} 
+                                    />
                                 </form>
                             </div>
                         </div>
