@@ -3,8 +3,10 @@ import { useState } from 'react';
 import logo from "../assets/logo.jpg"
 import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
     return (
         <>
             <div className='min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col items-center py-12 am:px-6 lg:px-8'>
@@ -75,7 +77,14 @@ const Login = () => {
 
                                     </div>
                                     <div className="text-center mt-6">
-                                        <p className="text-sm text-gray-600">Don't have an account? <a className="text-blue-500 hover:text-blue-700 font-medium" href="/signup" data-discover="true">Sign up</a>
+                                        <p className="text-sm text-gray-600">
+                                            Don't have an account?{" "}
+                                            <button
+                                                onClick={() => navigate("/signup")}
+                                                className="text-blue-500 hover:text-blue-700 font-medium"
+                                            >
+                                                Sign up
+                                            </button>
                                         </p>
                                     </div>
                                 </form>
