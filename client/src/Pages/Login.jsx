@@ -34,7 +34,7 @@ const Login = () => {
                 recaptchaToken: token 
             });
     
-            toast.success("User successfully registered");
+            toast.success(response.data.message);
            
             navigate("/");
         } catch (error) {
