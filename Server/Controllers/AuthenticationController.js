@@ -2,6 +2,8 @@ const users = require("../Model/UserModel");
 const axios=require("axios")
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const passport = require("passport");
+
 const registerUser = async (req, res) => {
     const { name, email, password, cpassword, recaptchaToken } = req.body;
     if (!name || !email || !password || !cpassword|| !recaptchaToken ) {
@@ -101,4 +103,8 @@ const validUser = async (req, res) => {
         res.status(401).json({ status: 401, error });
     }
 };
-module.exports={registerUser,loginUser,validUser}
+googleLogin = passport.authenticate("google", {
+    scope: ["profile", "email"]
+});
+
+module.exports={registerUser,loginUser,validUser,googleLogin}
