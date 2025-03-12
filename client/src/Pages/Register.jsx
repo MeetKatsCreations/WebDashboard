@@ -13,7 +13,6 @@ const Register = () => {
     const [formData, setFormData] = useState({ name: "", email: "", password: "", cpassword: "" });
     const [showPassword, setShowPassword] = useState(false);
     const [showCPassword, setShowCPassword] = useState(false);
-    const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const recaptchaRef = useRef(null);
@@ -33,10 +32,8 @@ const Register = () => {
             });
     
             toast.success("User successfully registered");
-            setTimeout(() => {
-                setLoading(false);
-                navigate("/");
-            }, 2000);
+            setLoading(false);
+            navigate("/");
         } catch (error) {
             
             const errorMessage = error.response?.data?.message || "An error occurred. Please try again.";
@@ -46,7 +43,6 @@ const Register = () => {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
         setLoading(true);
         if (recaptchaRef.current) {
             recaptchaRef.current.reset();

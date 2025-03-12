@@ -1,5 +1,7 @@
 const users = require("../Model/UserModel");
 const axios=require("axios")
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
     const { name, email, password, cpassword, recaptchaToken } = req.body;
     if (!name || !email || !password || !cpassword|| !recaptchaToken ) {

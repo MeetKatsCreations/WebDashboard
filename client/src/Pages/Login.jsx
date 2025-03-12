@@ -1,15 +1,71 @@
 import React from 'react'
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import logo from "../assets/logo.jpg"
 import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios"
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 const Login = () => {
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+        recaptchaToken: null,
+    });
+    const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const recaptchaRef = useRef(null);
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+    const handleRecaptchaVerify = async (token) => {
+        if (!token) {
+            toast.error("reCAPTCHA verification failed. Please try again.");
+            return;
+        }
+    
+        try {
+            const response = await axios.post("http://localhost:5000/login", { 
+                ...formData, 
+                recaptchaToken: token 
+            });
+    
+            toast.success("User successfully registered");
+           
+            navigate("/");
+        } catch (error) {
+            
+            const errorMessage = error.response?.data?.message || "An error occurred. Please try again.";
+           
+            toast.error(errorMessage);
+        }
+    };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
+    
+        if (!recaptchaRef.current) {
+            toast.error("reCAPTCHA not loaded.");
+            setLoading(false);
+            return;
+        }
+    
+        recaptchaRef.current.execute();
+    };
+
+
+
     return (
         <>
             <div className='min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col items-center py-12 am:px-6 lg:px-8'>
+                 <ToastContainer position="top-right" autoClose={3000} />
                 <div className='flex flex-col  items-center w-full h-50'>
                     <div className='h-24 w-24 rounded-full bg-white p-2 shadow-md  '>
                         <img src={logo} alt="logo" className='h-full w-full object-contain rounded-full' />
@@ -25,11 +81,11 @@ const Login = () => {
                         <div className='w-full max-w-md'>
                             <div className='bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4'>
                                 <h2 className='text-2xl font-bold mb-6 text-center text-gray-800'>Sign In</h2>
-                                <form >
+                                <form onSubmit={handleSubmit}>
                                     <div className='mb-4'>
 
                                         <label htmlFor="email" className='block text-gray-700 text-sm font-bold mb-2'>Email</label>
-                                        <input required type="text" placeholder=' Enter your email address' id="email" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
+                                        <input required type="text" onChange={handleChange} value={formData.email} name="email" placeholder=' Enter your email address' id="email" className='shadow appearance-none border rounded w-full py-2 px-3  text-gray-700 focus:outline-none focus:shadow-outline' />
                                     </div>
                                     <div className='mb-4'>
                                         <label htmlFor="password" className='block text-gray-700 text-sm font-bold mb-2'>Password</label>
@@ -39,6 +95,9 @@ const Login = () => {
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="*********"
                                                 id="password"
+                                                name='password'
+                                                value={formData.password}
+                                                onChange={handleChange}
                                                 className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline pr-10'
                                             />
                                             <button
@@ -87,6 +146,13 @@ const Login = () => {
                                             </button>
                                         </p>
                                     </div>
+                                    <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey={RECAPTCHA_SITE_KEY}
+                                        size="invisible" 
+                                        onChange={handleRecaptchaVerify}
+                                    />
+
                                 </form>
                             </div>
                         </div>
