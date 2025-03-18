@@ -19,6 +19,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 const port=process.env.PORT||3000
 app.use("/",require("./Routes/AuthenticationRoutes"))
+app.use("/event",require("./Routes/EventRoutes"))
 app.listen(port,()=>{
     console.log(`Server is running on ${port}`)
 })

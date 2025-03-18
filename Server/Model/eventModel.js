@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
-
+const { v4: uuidv4 } = require("uuid");
 const eventSchema = new mongoose.Schema({
+  eventId: {
+    type: String,
+    unique: true,
+    default: uuidv4, 
+  },
   title: {
     type: String,
     required: true,
@@ -22,14 +27,11 @@ const eventSchema = new mongoose.Schema({
   duration: {
     hours: {
       type: Number,
-      default: 0,
-      min: [0, "Hours cannot be negative"],
+      required:true
     },
     minutes: {
       type: Number,
-      default: 0,
-      min: [0, "Minutes cannot be negative"],
-      max: [59, "Minutes must be less than 60"],
+      required:true
     },
   },
   location: {
@@ -66,13 +68,14 @@ const eventSchema = new mongoose.Schema({
     },
     contactPhone: {
       type: String,
+      required:true,
       match: [/^\d{10}$/, "Phone number must be 10 digits"],
     },
   },
   price: {
     type: Number,
-    default: 0,
-    min: [0, "Price cannot be negative"],
+    required:true
+    
   },
   currency: {
     type: String,
@@ -80,8 +83,7 @@ const eventSchema = new mongoose.Schema({
   },
   capacity: {
     type: Number,
-    default: 0,
-    min: [0, "Capacity cannot be negative"],
+    required:true
   },
   image: {
     type: String,
@@ -89,8 +91,7 @@ const eventSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["Upcoming", "Ongoing", "Completed", "Cancelled"],
-    default: "Upcoming",
-  },
+    },
   createdAt: {
     type: Date,
     default: Date.now,
