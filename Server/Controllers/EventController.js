@@ -11,9 +11,14 @@ const addEvent = async (req, res) => {
       organizer,
       price,
       capacity,
+      tags
     } = req.body;
 
-    if (!title || !category || !description || !dateTime || !location || !organizer || !capacity || !price) {
+    if (
+      !title || !category || !description || !dateTime || !location || !organizer ||
+      tags === undefined || !Array.isArray(tags) || tags.length === 0 || 
+      capacity === undefined || price === undefined
+    ) {
       return res.status(400).json({
         success: false,
         message: "Fill all required fields!",
@@ -24,6 +29,12 @@ const addEvent = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid duration. Please provide hours and minutes as numbers.",
+      });
+    }
+    if ( tags.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Tags must be  non-empty ",
       });
     }
     if (duration.hours < 0 || duration.minutes < 0 || duration.minutes > 59) {
@@ -106,4 +117,31 @@ const addEvent = async (req, res) => {
   }
 };
 
-module.exports = { addEvent };
+const searchEvents = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ success: false, message: "Search query is required." });
+    }
+
+    const events = await Event.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+        { tags: { $regex: query, $options: "i" } },
+      ],
+    });
+
+    if (events.length === 0) {
+      return res.status(404).json({ success: false, message: "No matching events found." });
+    }
+
+    res.status(200).json({ success: true, events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error: " + error.message });
+  }
+};
+
+
+module.exports = { addEvent,searchEvents };

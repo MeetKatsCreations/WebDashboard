@@ -6,6 +6,10 @@ const eventSchema = new mongoose.Schema({
     unique: true,
     default: uuidv4, 
   },
+  tags: {
+    type: [String],
+    index: true, 
+  },
   title: {
     type: String,
     required: true,
