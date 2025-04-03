@@ -1,7 +1,6 @@
 const multer = require('multer');
 const path = require('path');
 
-
 const storage = multer.diskStorage({
     destination:(req,file,callback)=>{
         callback(null,"./uploads")
@@ -31,13 +30,13 @@ const isImage = (req, file, callback) => {
     }
 };
 
+
 const upload = multer({
     storage: storage,
     limits: { fileSize: 2000000 }, 
-    fileFilter: isImage
+    fileFilter:isImage
 })
 const uploadMultiple = upload.fields([
     { name: 'image', maxCount: 3 }
 ]);
-
 module.exports = {uploadMultiple};

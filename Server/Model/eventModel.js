@@ -18,7 +18,7 @@ const eventSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ["Technology", "Business", "Health", "Education", "Entertainment", "Other"],
+    enum: ["Technology", "Business", "Health", "Education"],
   },
   description: {
     type: String,
@@ -90,7 +90,7 @@ const eventSchema = new mongoose.Schema({
     required:true
   },
   image: {
-    type: String,
+    type: [String],
   },
   status: {
     type: String,

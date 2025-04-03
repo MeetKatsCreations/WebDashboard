@@ -7,33 +7,27 @@ const addEvent = async (req, res) => {
       category,
       description,
       dateTime,
-      duration,location,organizer,
-      price,
-      capacity,
       tags
     } = req.body;
-    // const duration = JSON.parse(req.body.duration || '{}');
-    // const location = JSON.parse(req.body.location || '{}');
-    // const organizer = JSON.parse(req.body.organizer || '{}');
-
-    // console.log("Parsed Duration:", duration);
-    // console.log("Parsed Location:", location);
-    // console.log("Parsed Organizer:", organizer);
-    // const image = req.files['image'] || [];
-    // const posterImageUrls = [];
-    // for (const file of image) {
-    //   try {
-    //     console.log("Uploading to Cloudinary:", file.path);
-    //     const upload = await cloudinary.uploader.upload(file.path);
-    //     posterImageUrls.push(upload.secure_url);
-    //   } catch (error) {
-    //     console.error("Error while uploading the poster image:", error);
-    //     return res.status(400).json({ message: "Error while uploading the poster image", error: error.message });
-    //   }
-    // }
+    const duration = req.body.duration ? JSON.parse(req.body.duration) : null;
+    const location = req.body.location ? JSON.parse(req.body.location) : null;
+    const organizer = req.body.organizer ? JSON.parse(req.body.organizer) : null;
+    const parsedTags = req.body.tags ? JSON.parse(req.body.tags) : null;
+    const image = req.files && req.files['image'] ? req.files['image'] : [];
+    const price = req.body.price ? Number(req.body.price) : undefined;
+    const capacity = req.body.capacity ? Number(req.body.capacity) : undefined;
+    let posterImageUrls = [];
+    for (const file of image) {
+      try {
+        const upload = await cloudinary.uploader.upload(file.path);
+        posterImageUrls.push(upload.secure_url);
+      } catch (error) {
+        return res.status(400).json({ message: "Error while uploading the poster image", error: error.message });
+      }
+    }
     if (
       !title || !category || !description || !dateTime || !location || !organizer ||
-      tags === undefined || !Array.isArray(tags) || tags.length === 0 ||
+      parsedTags.length === 0 ||
       capacity === undefined || price === undefined
     ) {
       return res.status(400).json({
@@ -131,7 +125,15 @@ const addEvent = async (req, res) => {
         message: "Capacity must be a positive number.",
       });
     }
-    const event = new Event({ ...req.body});
+    const event = new Event({
+      ...req.body, duration,
+      location,
+      organizer,
+      price: Number(req.body.price),
+      capacity: Number(req.body.capacity),
+      tags: parsedTags,
+      image: posterImageUrls
+    });
     await event.save();
 
     res.status(201).json({ success: true, message: "Event created successfully", event });

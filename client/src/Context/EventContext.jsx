@@ -10,36 +10,19 @@ export const EventProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const addEvent = async (newEvent) => {
+    const addEvent = async (eventData) => {
         try {
-            const response = await axios.post("http://localhost:5000/event/", newEvent, {
-                headers: { "Content-Type": "application/json" },
+            const response = await axios.post("http://localhost:5000/event/", eventData, {
+                headers: {
+                    "Content-Type": "multipart/form-data", // 🔥 Required for FormData
+                },
             });
-
-            if (response.status === 201) {
-                const addedEvent = response.data;
-
-                setEvents((prevEvents) => [...prevEvents, addedEvent]);
-
-                toast.success("Event Created Successfully");
-                // setEventData({
-                //     title: "",
-                //     category: "",
-                //     description: "",
-                //     tags: [],
-                //     dateTime: "",
-                //     duration: { hours: 0, minutes: 0 },
-                //     location: { type: "", address: "", link: "" },
-                //     organizer: { name: "", contactEmail: "", contactPhone: "" },
-                //     price: "",
-                //     capacity: "",
-                //     image: null,
-                //     status: "",
-                // });
-            }
+    
+            toast.success("Event created successfully!");
+            return response.data;
         } catch (error) {
-            console.error("Error creating event:", error);
-            toast.error(error.response?.data?.message || "An error occurred while creating the event.");
+            console.error("Error adding event:", error);
+            toast.error(error.response?.data?.message || "Failed to create event");
         }
     };
     const getEvents = async () => {

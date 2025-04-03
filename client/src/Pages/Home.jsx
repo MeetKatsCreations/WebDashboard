@@ -4,15 +4,15 @@ import Navbar from "../Components/Navbar";
 import { motion } from "framer-motion";
 
 const Home = () => {
-    const { events, loading, error,searchEvents,getEvents } = useContext(EventContext);
+    const { events, loading, error, searchEvents, getEvents } = useContext(EventContext);
     const [searchQuery, setSearchQuery] = useState("");
 
     const handleSearch = () => {
-        console.log("Searching for:", searchQuery); // Debugging search query
+        console.log("Searching for:", searchQuery);
         searchEvents(searchQuery);
     };
     useEffect(() => {
-        getEvents(); 
+        getEvents();
     }, []);
     return (
         <div className="flex flex-col bg-orange-50 min-h-screen">
@@ -21,7 +21,6 @@ const Home = () => {
                 <h1 className="text-xl md:text-3xl font-bold py-4">Welcome to MeetKats</h1>
                 <h2 className="text-3xl md:text-5xl">Grow Your Network & Skills with Our Events</h2>
 
-                {/* Search Input */}
                 <div className="flex items-center gap-4 mb-6 px-12 text-gray-500">
                     <input
                         type="text"
@@ -30,18 +29,16 @@ const Home = () => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <button  onClick={handleSearch} className="bg-orange-500 text-white px-2 py-2 rounded-lg hover:bg-orange-600">
+                    <button onClick={handleSearch} className="bg-orange-500 text-white px-2 py-2 rounded-lg hover:bg-orange-600">
                         Search
                     </button>
                 </div>
             </div>
 
-            {/* Event List */}
             <div className="flex-1 p-6 ml-20">
                 {loading && <p>Loading events...</p>}
                 {error && <p className="text-red-500">{error}</p>}
 
-                {/* Ensure `events` is valid before mapping */}
                 {Array.isArray(events) && events.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {events.map((event, index) => (
@@ -70,18 +67,27 @@ const Home = () => {
                                             </span>
                                         ))}
                                     </div>
+                                    <div className="flex justify-between items-end ">
+                                        <div>
+                                            <p className="text-black font-medium">
+                                                🎟️ Ticket Price: <span className="font-bold">₹{event.price ?? "N/A"}</span>
+                                            </p>
 
-                                    <p className="text-black font-medium">
-                                        🎟️ Ticket Price: <span className="font-bold">₹{event.price ?? "N/A"}</span>
-                                    </p>
+                                            <p className="text-black">
+                                                ⏳ Duration: {event.duration ? `${event.duration.hours}h ${event.duration.minutes}m` : "N/A"}
+                                            </p>
 
-                                    <p className="text-black">
-                                        ⏳ Duration: {event.duration ? `${event.duration.hours}h ${event.duration.minutes}m` : "N/A"}
-                                    </p>
+                                            <p className="text-black">
+                                                📅 Date: <span className="font-semibold">{new Date(event.dateTime).toDateString()}</span>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <button className="bg-orange-500 text-white px-2 py-1 mt-2 rounded-lg hover:bg-orange-600">Book Now</button>
 
-                                    <p className="text-black">
-                                        📅 Date: <span className="font-semibold">{new Date(event.dateTime).toDateString()}</span>
-                                    </p>
+                                        </div>
+
+                                    </div>
+
                                 </div>
                             </motion.div>
                         ))}
