@@ -62,7 +62,8 @@ userSchema.methods.generateAuthToken = async function () {
         await this.save();
         return token23;
     } catch (error) {
-        res.status(422).json(error)
+        console.error("Token Generation Error:", error);
+        throw new Error("Failed to generate token");
     }
 }
 

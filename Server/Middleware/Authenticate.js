@@ -1,30 +1,21 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-const users=require("../Model/UserModel")
-const keysecret = process.env.SECRET_KEY
+const authenticate = (req, res, next) => {
+    const token = req.header("Authorization")?.split(" ")[1]; // Extract token
 
-
-const authenticate = async(req,res,next)=>{
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
+    }
 
     try {
-        const token = req.headers.authorization;
-        
-        const verifytoken = jwt.verify(token,keysecret);
-        
-        const rootUser = await users.findOne({_id:verifytoken._id});
-        
-        if(!rootUser) {throw new Error("user not found")}
-
-        req.token = token
-        req.rootUser = rootUser
-        req.userId = rootUser._id
-        
-        next();
-
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        req.user = decoded; // Store user info in request
+        next(); // Allow request to proceed
     } catch (error) {
-        res.status(401).json({status:401,message:"Unauthorized no token provide"})
+        console.error("JWT Verification Error:", error);
+        return res.status(403).json({ message: "Unauthorized: Invalid token" });
     }
-}
+};
 
-
-module.exports = authenticate
+module.exports = authenticate;

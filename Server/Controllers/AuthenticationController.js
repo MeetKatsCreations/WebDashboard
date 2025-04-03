@@ -3,7 +3,8 @@ const axios=require("axios")
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
-
+const GoogleUser = require("../Model/googleUser");
+const mongoose = require("mongoose");
 const registerUser = async (req, res) => {
     const { name, email, password, cpassword, recaptchaToken } = req.body;
     if (!name || !email || !password || !cpassword|| !recaptchaToken ) {
@@ -55,7 +56,6 @@ const loginUser = async (req, res) => {
         return res.status(400).json({ message: "Fill all the required fields!" });
     }
     try {
-        console.log("Received reCAPTCHA Token:", recaptchaToken);
         const response = await axios.post(
             `https://www.google.com/recaptcha/api/siteverify`,
             null,
@@ -66,7 +66,7 @@ const loginUser = async (req, res) => {
                 },
             }
         );
-        console.log("reCAPTCHA API Response:", response.data);
+        console.log("reCAPTCHA response:", response.data);
         if (!response.data.success) {
             return res.status(400).json({ message: "reCAPTCHA validation failed!", details: response.data });
         }
@@ -79,28 +79,50 @@ const loginUser = async (req, res) => {
                 return res.status(400).json({ message: "Invalid details!" });
             } else {
                 const token = await preUser.generateAuthToken();
+                console.log("Generated Token:", token);
                 res.cookie("usercookie", token, {
                     expires: new Date(Date.now() + 9000000),
                     httpOnly: true
                 });
 
-                const result = {
-                    preUser,
-                    token
-                };
-                return res.status(201).json({ message: "User logged in successfully", result });
+                return res.status(201).json({
+                    message: "User logged in successfully",
+                    token,
+                    user: preUser 
+                });
             }
         }
     } catch (error) {
         res.status(500).json({ message: "Error while logging in a user", error: error.message });
     }
 };
+
 const validUser = async (req, res) => {
     try {
-        const preUserOne = await users.findOne({ _id: req.userId });
-        res.status(201).json({ status: 201, preUserOne });
+        const token = req.header("Authorization")?.split(" ")[1];
+        console.log("Token received:", token);
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized: No token provided" });
+        }
+
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        console.log("Decoded Token:", decoded);
+
+       
+        const user = await users.findById(new mongoose.Types.ObjectId(decoded._id));
+
+        if (!user) {
+            user = await GoogleUser.findById(decoded.id);
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found in DB" });
+        }
+
+        res.json({ user });
     } catch (error) {
-        res.status(401).json({ status: 401, error });
+        console.error("Valid User Error:", error);
+        res.status(500).json({ message: "Server Error" });
     }
 };
 googleLogin = passport.authenticate("google", {

@@ -26,7 +26,7 @@ passport.use(
                 }
 
                 const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: "1h" });
-
+                console.log("Generated Token:", token);
                 return done(null, { user, token });
             } catch (error) {
                 return done(error, null);

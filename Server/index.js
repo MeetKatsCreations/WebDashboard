@@ -8,7 +8,10 @@ require("./Config/Config")
 app.use(express.json())
 app.use(cookieParser())
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173", 
+    credentials: true,                
+}));
 app.use(session({
     secret: "9527351144674ansh@11234",
     resave: false,
@@ -20,6 +23,7 @@ app.use(passport.session());
 const port=process.env.PORT||3000
 app.use("/",require("./Routes/AuthenticationRoutes"))
 app.use("/event",require("./Routes/EventRoutes"))
+app.use("/profile",require("./Routes/ProfileRoutes"))
 app.listen(port,()=>{
     console.log(`Server is running on ${port}`)
 })

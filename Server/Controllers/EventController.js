@@ -1,4 +1,5 @@
 const Event = require("../Model/eventModel");
+const cloudinary = require("../Middleware/Cloudinary");
 const addEvent = async (req, res) => {
   try {
     const {
@@ -6,17 +7,33 @@ const addEvent = async (req, res) => {
       category,
       description,
       dateTime,
-      duration,
-      location,
-      organizer,
+      duration,location,organizer,
       price,
       capacity,
       tags
     } = req.body;
+    // const duration = JSON.parse(req.body.duration || '{}');
+    // const location = JSON.parse(req.body.location || '{}');
+    // const organizer = JSON.parse(req.body.organizer || '{}');
 
+    // console.log("Parsed Duration:", duration);
+    // console.log("Parsed Location:", location);
+    // console.log("Parsed Organizer:", organizer);
+    // const image = req.files['image'] || [];
+    // const posterImageUrls = [];
+    // for (const file of image) {
+    //   try {
+    //     console.log("Uploading to Cloudinary:", file.path);
+    //     const upload = await cloudinary.uploader.upload(file.path);
+    //     posterImageUrls.push(upload.secure_url);
+    //   } catch (error) {
+    //     console.error("Error while uploading the poster image:", error);
+    //     return res.status(400).json({ message: "Error while uploading the poster image", error: error.message });
+    //   }
+    // }
     if (
       !title || !category || !description || !dateTime || !location || !organizer ||
-      tags === undefined || !Array.isArray(tags) || tags.length === 0 || 
+      tags === undefined || !Array.isArray(tags) || tags.length === 0 ||
       capacity === undefined || price === undefined
     ) {
       return res.status(400).json({
@@ -31,7 +48,13 @@ const addEvent = async (req, res) => {
         message: "Invalid duration. Please provide hours and minutes as numbers.",
       });
     }
-    if ( tags.length === 0) {
+    if (title.length > 60) {
+      return res.status(400).json({
+        success: false,
+        message: "Title must be less than 60 characters ",
+      });
+    }
+    if (tags.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Tags must be  non-empty ",
@@ -108,7 +131,7 @@ const addEvent = async (req, res) => {
         message: "Capacity must be a positive number.",
       });
     }
-    const event = new Event(req.body);
+    const event = new Event({ ...req.body});
     await event.save();
 
     res.status(201).json({ success: true, message: "Event created successfully", event });
@@ -142,6 +165,13 @@ const searchEvents = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error: " + error.message });
   }
 };
+const getEvents = async (req, res) => {
+  try {
+    const events = await Event.find();
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching events", error });
+  }
+}
 
-
-module.exports = { addEvent,searchEvents };
+module.exports = { addEvent, searchEvents, getEvents };
