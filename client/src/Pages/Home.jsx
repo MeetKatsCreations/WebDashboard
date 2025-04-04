@@ -2,11 +2,15 @@ import { useContext, useEffect, useState } from "react";
 import { EventContext } from "../Context/EventContext";
 import Navbar from "../Components/Navbar";
 import { motion } from "framer-motion";
+import { TicketContext } from "../Context/TicketContext";
+import TicketModal from "../Components/TicketModal";
 
 const Home = () => {
     const { events, loading, error, searchEvents, getEvents } = useContext(EventContext);
     const [searchQuery, setSearchQuery] = useState("");
-
+    const [showModal, setShowModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const { bookTicket, ticket, qrCode, ticketId ,clearTicket} = useContext(TicketContext);
     const handleSearch = () => {
         console.log("Searching for:", searchQuery);
         searchEvents(searchQuery);
@@ -14,6 +18,16 @@ const Home = () => {
     useEffect(() => {
         getEvents();
     }, []);
+    const resetModal = () => {
+        setShowModal(false);
+        setSelectedEvent(null);
+        clearTicket();
+    };
+    const handleBookNow = (event) => {
+        setSelectedEvent(event);
+        bookTicket("John Doe", event.title, event.dateTime);
+        setShowModal(true);
+    };
     return (
         <div className="flex flex-col bg-orange-50 min-h-screen">
             <Navbar />
@@ -67,7 +81,7 @@ const Home = () => {
                                             </span>
                                         ))}
                                     </div>
-                                    <div className="flex justify-between items-end ">
+                                    <div className="flex justify-between items-end">
                                         <div>
                                             <p className="text-black font-medium">
                                                 🎟️ Ticket Price: <span className="font-bold">₹{event.price ?? "N/A"}</span>
@@ -81,13 +95,13 @@ const Home = () => {
                                                 📅 Date: <span className="font-semibold">{new Date(event.dateTime).toDateString()}</span>
                                             </p>
                                         </div>
-                                        <div>
-                                            <button className="bg-orange-500 text-white px-2 py-1 mt-2 rounded-lg hover:bg-orange-600">Book Now</button>
-
-                                        </div>
-
+                                        <button
+                                            className="bg-orange-500 text-white px-2 py-1 mt-2 rounded-lg hover:bg-orange-600"
+                                            onClick={() => handleBookNow(event)}
+                                        >
+                                            Book Now
+                                        </button>
                                     </div>
-
                                 </div>
                             </motion.div>
                         ))}
@@ -96,6 +110,11 @@ const Home = () => {
                     !loading && <p>No events found.</p>
                 )}
             </div>
+
+            {ticket && <TicketModal event={selectedEvent} ticketId={ticketId} qrCode={qrCode} onClose={() => {
+                resetModal();      
+                navigate("/");      
+            }} />}
         </div>
     );
 };
