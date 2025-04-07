@@ -2,7 +2,7 @@ const Ticket = require('../Model/TicketModel');
 const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-
+const mongoose= require("mongoose")
 bookTicket = async (req, res) => {
   const { userName, eventName, timing } = req.body;
   const ticketData = `${userName} | ${eventName} | ${timing}`;
@@ -12,31 +12,34 @@ bookTicket = async (req, res) => {
   res.json({ message: 'Ticket Booked!', qrCode, ticketId: newTicket._id });
 };
 
-downloadTicket = async (req, res) => {
-    const ticket = await Ticket.findById(req.params.id);
-    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+
+  const downloadTicket = async (req, res) => {
+    const { id } = req.params;
   
-    const dir = './tickets';
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir); 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Ticket ID" });
     }
   
-    const doc = new PDFDocument();
+    
+    const ticket = await Ticket.findById(id);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+  
     const fileName = `ticket-${ticket._id}.pdf`;
-    const filePath = `${dir}/${fileName}`;
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Type', 'application/pdf');
   
-    doc.pipe(fs.createWriteStream(filePath));
+    const doc = new PDFDocument();
+    doc.pipe(res);
+  
     doc.fontSize(20).text(`Ticket for ${ticket.eventName}`, { align: 'center' });
-    doc.text(`Name: ${ticket.userName}`);
+    doc.moveDown();
+    doc.fontSize(14).text(`Name: ${ticket.userName}`);
     doc.text(`Timing: ${ticket.timing}`);
-    doc.image(ticket.qrCode, { width: 150, height: 150 });
-    doc.end();
+    doc.moveDown();
   
-    doc.on('finish', () => {
-      res.download(filePath, fileName, (err) => {
-        if (err) console.error('Error sending file:', err);
-      });
-    });
+    doc.image(ticket.qrCode, { width: 150, height: 150 });
+  
+    doc.end(); 
   };
 
 verifyTicket = async (req, res) => {

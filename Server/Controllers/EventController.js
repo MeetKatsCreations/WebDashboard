@@ -7,7 +7,8 @@ const addEvent = async (req, res) => {
       category,
       description,
       dateTime,
-      tags
+      tags,
+      startTime
     } = req.body;
     const duration = req.body.duration ? JSON.parse(req.body.duration) : null;
     const location = req.body.location ? JSON.parse(req.body.location) : null;
@@ -36,6 +37,7 @@ const addEvent = async (req, res) => {
       });
     }
 
+ 
     if (!duration || typeof duration.hours !== "number" || typeof duration.minutes !== "number") {
       return res.status(400).json({
         success: false,
@@ -61,20 +63,19 @@ const addEvent = async (req, res) => {
       });
     }
 
-    const eventDate = new Date(dateTime);
-    if (isNaN(eventDate.getTime())) {
+    const eventDateTime = new Date(`${dateTime}T${startTime}:00`);
+    if (isNaN(eventDateTime.getTime())) {
       return res.status(400).json({
         success: false,
-        message: "Invalid date format. Please provide a valid dateTime.",
+        message: "Invalid date or time. Please provide valid values.",
       });
     }
-    if (eventDate < new Date()) {
+    if (eventDateTime < new Date()) {
       return res.status(400).json({
         success: false,
-        message: "Event date cannot be in the past.",
+        message: "Event date/time cannot be in the past.",
       });
     }
-
     if (!location.type || !["Virtual", "Physical"].includes(location.type)) {
       return res.status(400).json({
         success: false,
@@ -132,7 +133,9 @@ const addEvent = async (req, res) => {
       price: Number(req.body.price),
       capacity: Number(req.body.capacity),
       tags: parsedTags,
-      image: posterImageUrls
+      image: posterImageUrls,
+      dateTime: eventDateTime,
+
     });
     await event.save();
 
