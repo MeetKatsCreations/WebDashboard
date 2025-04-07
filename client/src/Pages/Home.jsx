@@ -4,13 +4,14 @@ import Navbar from "../Components/Navbar";
 import { motion } from "framer-motion";
 import { TicketContext } from "../Context/TicketContext";
 import TicketModal from "../Components/TicketModal";
-
+import AuthContext from "../Context/AuthContext";
 const Home = () => {
     const { events, loading, error, searchEvents, getEvents } = useContext(EventContext);
     const [searchQuery, setSearchQuery] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const { bookTicket, ticket, qrCode, ticketId ,clearTicket} = useContext(TicketContext);
+    const { user } = useContext(AuthContext);
+    const { bookTicket, ticket, qrCode, ticketId, clearTicket } = useContext(TicketContext);
     const handleSearch = () => {
         console.log("Searching for:", searchQuery);
         searchEvents(searchQuery);
@@ -24,10 +25,26 @@ const Home = () => {
         clearTicket();
     };
     const handleBookNow = (event) => {
+        if (!user) {
+            alert("Please log in to book a ticket.");
+            return;
+        }
+
         setSelectedEvent(event);
-        bookTicket("John Doe", event.title, event.dateTime);
+        bookTicket(user.name, event.title, event.dateTime);
         setShowModal(true);
     };
+    const formatTimeTo12Hour = (time24) => {
+        if (!time24 || typeof time24 !== "string" || !time24.includes(":")) {
+          return "Invalid Time";
+        }
+      
+        const [hourStr, minute] = time24.split(":");
+        let hour = parseInt(hourStr, 10);
+        const ampm = hour >= 12 ? "PM" : "AM";
+        hour = hour % 12 || 12; 
+        return `${hour}:${minute} ${ampm}`;
+      };
     return (
         <div className="flex flex-col bg-orange-50 min-h-screen">
             <Navbar />
@@ -94,6 +111,10 @@ const Home = () => {
                                             <p className="text-black">
                                                 📅 Date: <span className="font-semibold">{new Date(event.dateTime).toDateString()}</span>
                                             </p>
+                                            <p className="text-black">
+                                                📅 Time: <span className="font-semibold">{formatTimeTo12Hour(event.startTime)}</span>
+                                            </p>
+
                                         </div>
                                         <button
                                             className="bg-orange-500 text-white px-2 py-1 mt-2 rounded-lg hover:bg-orange-600"
@@ -112,8 +133,8 @@ const Home = () => {
             </div>
 
             {ticket && <TicketModal event={selectedEvent} ticketId={ticketId} qrCode={qrCode} onClose={() => {
-                resetModal();      
-                navigate("/");      
+                resetModal();
+                navigate("/");
             }} />}
         </div>
     );

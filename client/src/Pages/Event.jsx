@@ -19,6 +19,7 @@ const Event = () => {
         description: "",
         tags: [],
         dateTime: "",
+        startTime: "",
         duration: { hours: 0, minutes: 0 },
         location: { type: "", address: "", link: "" },
         organizer: { name: "", contactEmail: "", contactPhone: "" },
@@ -32,6 +33,9 @@ const Event = () => {
         const { name, value, type, files } = e.target;
         if (name === "title" && value.length > 60) {
             return;
+        }
+        else if (name === "startTime") {
+            setEventData({ ...eventData, startTime: value });
         }
         else if (name.startsWith("duration.")) {
             const key = name.split(".")[1];
@@ -117,6 +121,10 @@ const Event = () => {
             toast.error("Please provide the address for a Physical event");
             return false;
         }
+        if (!eventData.startTime) {
+            toast.error("Please select a start time for the event");
+            return false;
+        }
 
         return true;
     };
@@ -135,8 +143,8 @@ const Event = () => {
         formData.append("dateTime", eventData.dateTime);
         formData.append("price", parseInt(eventData.price, 10) || 0);
         formData.append("capacity", parseInt(eventData.capacity, 10) || 0);
-        formData.append("status", eventData.status);
-
+        formData.append("status", eventData.status); 
+        formData.append("startTime", eventData.startTime);
         formData.append("duration", JSON.stringify({
             hours: parseInt(eventData.duration.hours, 10) || 0,
             minutes: parseInt(eventData.duration.minutes, 10) || 0,
@@ -152,8 +160,8 @@ const Event = () => {
             formData.append("image", eventData.image);
         }
 
-        const result=await addEvent(formData);
-        if(result.success){
+        const result = await addEvent(formData);
+        if (result.success) {
             setEventData({
                 title: "",
                 category: "",
@@ -164,6 +172,7 @@ const Event = () => {
                 location: { type: "", address: "", link: "" },
                 organizer: { name: "", contactEmail: "", contactPhone: "" },
                 price: "",
+                startTime: "",
                 capacity: "",
                 image: null,
                 status: "",
@@ -211,6 +220,14 @@ const Event = () => {
                             <>
                                 <h2 className="text-lg font-semibold mb-4">When, Where, and How much?</h2>
                                 <InputField label="Date" name="dateTime" type="date" value={eventData.dateTime} onChange={handleChange} required />
+                                <InputField
+                                    label="Start Time"
+                                    name="startTime"
+                                    type="time"
+                                    value={eventData.startTime}
+                                    onChange={handleChange}
+                                    required
+                                />
                                 <DurationField hours={eventData.duration.hours} minutes={eventData.duration.minutes} onChange={handleChange} />
                                 <SelectField label="Event Location Type" name="location.type" options={["Physical", "Virtual"]} value={eventData.location.type} onChange={handleChange} required />
                                 <LocationField locationType={eventData.location.type} onChange={handleChange} />
