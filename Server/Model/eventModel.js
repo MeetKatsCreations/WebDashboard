@@ -94,6 +94,10 @@ const eventSchema = new mongoose.Schema({
     type: Number,
     required:true
   },
+  bookedSeats: {
+    type: Number,
+    default: 0,
+  },
   image: {
     type: [String],
   },

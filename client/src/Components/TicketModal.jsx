@@ -13,9 +13,9 @@ const TicketModal = ({ event, ticketId, qrCode, onClose }) => {
         >
             <div 
                 className="bg-orange-50 p-6 rounded-2xl shadow-2xl text-center w-96 relative border-2 border-orange-200"
-                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* Close Button */}
+               
                 <button 
                     onClick={() => navigate("/")}
                     className="absolute top-2 right-2 text-orange-500 hover:text-red-500 text-lg font-bold"

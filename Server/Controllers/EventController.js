@@ -178,5 +178,12 @@ const getEvents = async (req, res) => {
     res.status(500).json({ message: "Error fetching events", error });
   }
 }
+const getAvailableSeats = async (req, res) => {
+  const { id } = req.params;
+  const event = await Event.findById(id);
+  if (!event) return res.status(404).json({ message: "Event not found" });
 
-module.exports = { addEvent, searchEvents, getEvents };
+  const remaining = event.capacity - event.bookedSeats;
+  res.json({ remainingSeats: remaining });
+};
+module.exports = { addEvent, searchEvents, getEvents,getAvailableSeats };

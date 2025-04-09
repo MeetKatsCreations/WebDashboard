@@ -13,15 +13,16 @@ export const TicketProvider = ({ children }) => {
     setQrCode(null);
     setTicketId(null);
   };
-  const bookTicket = async (userName, eventName, timing) => {
+  const bookTicket = async ({userName,eventId, timing,startTime}) => {
     try {
       const response = await axios.post("http://localhost:5000/ticket/book", {
         userName,
-        eventName,
+        eventId,
         timing,
+        startTime
       });
 
-      setTicket({ userName, eventName, timing });
+      setTicket({ userName,  timing ,startTime});
       setQrCode(response.data.qrCode);
       setTicketId(response.data.ticketId);
     } catch (error) {

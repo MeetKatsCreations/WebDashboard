@@ -14,7 +14,7 @@ export const EventProvider = ({ children }) => {
         try {
             const response = await axios.post("http://localhost:5000/event/", eventData, {
                 headers: {
-                    "Content-Type": "multipart/form-data", // 🔥 Required for FormData
+                    "Content-Type": "multipart/form-data", 
                 },
             });
     
@@ -52,13 +52,22 @@ export const EventProvider = ({ children }) => {
         }
         setLoading(false);
     };
-
+    const getAvailableSeats = async (eventId) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/event/${eventId}/seats`);
+            return response.data.remainingSeats;
+        } catch (error) {
+            console.error("Error fetching available seats:", error);
+            toast.error("Could not fetch seat availability");
+            return null;
+        }
+    };
     useEffect(() => {
         getEvents(); 
     }, []);
 
     return (
-        <EventContext.Provider value={{ events, loading, error, searchEvents ,getEvents,addEvent}}>
+        <EventContext.Provider value={{ events, loading, error, searchEvents ,getEvents,addEvent,getAvailableSeats}}>
             {children}
             <ToastContainer position="top-right" autoClose={5000} />
         </EventContext.Provider>

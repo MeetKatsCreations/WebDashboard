@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { EventContext } from "../Context/EventContext";
 import Navbar from "../Components/Navbar";
 import { motion } from "framer-motion";
@@ -6,9 +7,12 @@ import { TicketContext } from "../Context/TicketContext";
 import TicketModal from "../Components/TicketModal";
 import AuthContext from "../Context/AuthContext";
 const Home = () => {
-    const { events, loading, error, searchEvents, getEvents } = useContext(EventContext);
+    const { events, loading, error, searchEvents, getEvents, getAvailableSeats } = useContext(EventContext);
     const [searchQuery, setSearchQuery] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [seatsLeftMap, setSeatsLeftMap] = useState({});
+    const navigate = useNavigate();
+
     const [selectedEvent, setSelectedEvent] = useState(null);
     const { user } = useContext(AuthContext);
     const { bookTicket, ticket, qrCode, ticketId, clearTicket } = useContext(TicketContext);
@@ -18,33 +22,64 @@ const Home = () => {
     };
     useEffect(() => {
         getEvents();
+
     }, []);
+    useEffect(() => {
+        const fetchSeatsForEvents = async () => {
+            const map = {};
+            for (const event of events) {
+                const remaining = await getAvailableSeats(event._id);
+                map[event._id] = remaining;
+            }
+            setSeatsLeftMap(map);
+        };
+
+        if (events.length > 0) {
+            fetchSeatsForEvents();
+        }
+    }, [events]);
     const resetModal = () => {
         setShowModal(false);
         setSelectedEvent(null);
         clearTicket();
     };
-    const handleBookNow = (event) => {
+    const handleBookNow = async (event) => {
         if (!user) {
             alert("Please log in to book a ticket.");
             return;
         }
 
         setSelectedEvent(event);
-        bookTicket(user.name, event.title, event.dateTime);
+
+        await bookTicket({
+            userName: user.name,
+            eventId: event._id,
+            timing: event.dateTime,
+            startTime: event.startTime,
+        });
+
+       
         setShowModal(true);
+
+        
+        setSeatsLeftMap((prevMap) => ({
+            ...prevMap,
+            [event._id]: (prevMap[event._id] || 1) - 1,
+        }));
     };
+
+
     const formatTimeTo12Hour = (time24) => {
         if (!time24 || typeof time24 !== "string" || !time24.includes(":")) {
-          return "Invalid Time";
+            return "Invalid Time";
         }
-      
+
         const [hourStr, minute] = time24.split(":");
         let hour = parseInt(hourStr, 10);
         const ampm = hour >= 12 ? "PM" : "AM";
-        hour = hour % 12 || 12; 
+        hour = hour % 12 || 12;
         return `${hour}:${minute} ${ampm}`;
-      };
+    };
     return (
         <div className="flex flex-col bg-orange-50 min-h-screen">
             <Navbar />
@@ -114,14 +149,24 @@ const Home = () => {
                                             <p className="text-black">
                                                 📅 Time: <span className="font-semibold">{formatTimeTo12Hour(event.startTime)}</span>
                                             </p>
-
+                                           
+                                            <p className="text-black">
+                                                💺 Seats Left:{" "}
+                                                <span className="font-semibold">
+                                                    {seatsLeftMap[event._id] !== undefined ? seatsLeftMap[event._id] : "Loading..."}
+                                                </span>
+                                            </p>
                                         </div>
-                                        <button
-                                            className="bg-orange-500 text-white px-2 py-1 mt-2 rounded-lg hover:bg-orange-600"
-                                            onClick={() => handleBookNow(event)}
-                                        >
-                                            Book Now
-                                        </button>
+                                        {seatsLeftMap[event._id] > 0 ? (
+                                            <button
+                                                className="bg-orange-500 text-white px-2 py-1 mt-2 rounded-lg hover:bg-orange-600"
+                                                onClick={() => handleBookNow(event)}
+                                            >
+                                                Book Now
+                                            </button>
+                                        ) : (
+                                            <p className="text-red-500 mt-2 font-semibold">Sold Out</p>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
@@ -132,10 +177,17 @@ const Home = () => {
                 )}
             </div>
 
-            {ticket && <TicketModal event={selectedEvent} ticketId={ticketId} qrCode={qrCode} onClose={() => {
-                resetModal();
-                navigate("/");
-            }} />}
+            {showModal && ticket && (
+                <TicketModal
+                    event={selectedEvent}
+                    ticketId={ticketId}
+                    qrCode={qrCode}
+                    onClose={() => {
+                        resetModal();
+                        navigate("/");
+                    }}
+                />
+            )}
         </div>
     );
 };
